@@ -1,6 +1,10 @@
 // Variables
 :root {
   --primary: #000;
+  --orange: #df9242;
+  --blue: #62c1db;
+  --dark-blue: #14183e;
+  --gray: #969696;
 }
 
 $primary: var(--primary);
@@ -13,12 +17,12 @@ html,
 body,
 #root,
 .ant-app {
-  font-family: sans-serif;
+  font-family: "Poppins", sans-serif;
   color: $black;
 }
 
 html {
-  font-family: sans-serif;
+  font-family: "Poppins", sans-serif;
   scroll-behavior: smooth;
 }
 

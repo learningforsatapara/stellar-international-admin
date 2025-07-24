@@ -30,6 +30,9 @@ import "./Components/style.scss";
 // Lazy-loaded Pages
 const PageNotFound = lazy(() => import("./Components/Error.jsx"));
 
+// Auth
+const Login = lazy(() => import("./Auth/Login.jsx"));
+
 const Index = lazy(() => import("./Pages/Index.jsx"));
 const Home = lazy(() => import("./Pages/Home.jsx"));
 
@@ -40,7 +43,7 @@ createRoot(document.getElementById("root")).render(
     <ConfigProvider
       theme={{
         token: {
-          fontFamily: "",
+          fontFamily: "Poppins",
         },
       }}
     >
@@ -50,6 +53,10 @@ createRoot(document.getElementById("root")).render(
             <Suspense fallback={<SiteLoader />}>
               <ErrorBoundary FallbackComponent={ErrorFallbackPage}>
                 <Routes>
+                  <Route path="/auth">
+                    <Route path="login" element={<Login />} />
+                  </Route>
+
                   <Route path="/" element={<Index />}>
                     <Route path="" element={<Home />} />
                     {/* <Route path="*" element={<PageNotFound />} /> */}

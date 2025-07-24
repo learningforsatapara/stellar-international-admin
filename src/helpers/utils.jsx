@@ -30,6 +30,11 @@ export const BUCKET_URL = IS_DEV
 
 export const PROFILE_URL = BUCKET_URL + "/profile";
 
+export const APIKEY = import.meta.env.VITE_API_KEY;
+export const SECRET_KEY = import.meta.env.VITE_SECRET_KEY;
+export const SECRET_EMAIL = import.meta.env.VITE_EMAIL;
+export const SECRET_PASSWORD = import.meta.env.VITE_PASSWORD;
+
 /** Common Variables */
 export const EMAIL_REGEX = /^[\w+-.]+@([\w-]+\.)+[\w-]{2,4}$/g;
 export const PHONE_REGEX =
