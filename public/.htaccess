@@ -1,0 +1,15 @@
+# Enable RewriteEngine
+RewriteEngine On
+
+# Set the base URL
+RewriteBase 
+
+# Handle requests to static assets (CSS, JavaScript, images, etc.)
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteRule ^static/(.*)$ /static/$1 [L]
+
+# Redirect all requests to the index.html (React's main entry point)
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteRule ^(.*)$ /index.html [L]
