@@ -1,5 +1,10 @@
 import React from "react";
 import { useState } from "react";
+import {
+  decryptedEmail,
+  SECRET_EMAIL,
+  SECRET_PASSWORD,
+} from "../helpers/utils";
 
 const EyeIcon = ({ visible }) => (
   <svg
@@ -70,4 +75,11 @@ export const PasswordField = ({
       {error && <div className="invalid-feedback d-block">{error}</div>}
     </div>
   );
+};
+
+export const isLogin = () => {
+  const loginStatus = localStorage.getItem("loginStatus") === "true";
+  const login =
+    SECRET_EMAIL === decryptedEmail || SECRET_PASSWORD === decryptedEmail;
+  return loginStatus && login;
 };

@@ -10,7 +10,7 @@
 $primary: var(--primary);
 $white: #fff;
 $black: #121212;
-$focus-color: rgba(202, 255, 66, 0.25);
+$focus-color: rgba(20, 24, 62, 0.25);
 
 // Font & Base
 html,
@@ -19,16 +19,26 @@ body,
 .ant-app {
   font-family: "Poppins", sans-serif;
   color: $black;
+  background: #dce5fe;
+}
+
+body {
+  min-height: 100dvh;
 }
 
 html {
   font-family: "Poppins", sans-serif;
   scroll-behavior: smooth;
+  background: #dce5feb5;
 }
 
 // Text color utility
 .text-primary-2 {
   color: $primary;
+}
+
+.text-orange {
+  color: var(--orange);
 }
 
 // Mixin for text truncation with variable line clamp

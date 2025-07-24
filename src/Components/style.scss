@@ -1,0 +1,32 @@
+.page {
+  padding: 3rem 0;
+
+  .btn {
+    min-width: 100px;
+    background: var(--dark-blue) !important;
+    border-color: var(--dark-blue) !important;
+  }
+}
+
+.title {
+  font-size: 1.5rem;
+  color: var(--dark-blue);
+  margin-bottom: 0;
+  @media screen and (min-width: 768px) {
+    font-size: 2rem;
+  }
+}
+
+.antd-card {
+  .ant-card-body {
+    padding: 1rem;
+  }
+}
+
+.lone-modal {
+  .btn {
+    min-width: 100px;
+    background: var(--dark-blue) !important;
+    border-color: var(--dark-blue) !important;
+  }
+}

@@ -1,7 +1,10 @@
 import moment from "moment";
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
+import CryptoJS from "crypto-js";
+
 import ErrorLogo from "../assets/image/default/404.svg";
+import { isLogin } from "../Components/Component";
 
 /** Environment */
 export const IS_DEV = false;
@@ -146,9 +149,9 @@ export const ErrorFallbackPage = ({ error, resetErrorBoundary }) => {
             Contact us at :{" "}
             <Link
               className="ff_md f14 text-dark"
-              to="mailto: your-email@gmail.con"
+              to="mailto: info.stellarint@gmail.com"
             >
-              your-email@gmail.com
+              info.stellarint@gmail.com
             </Link>{" "}
           </span>
         </p>
@@ -193,4 +196,29 @@ export const SiteLoader = ({ text }) => {
       </p>
     </div>
   );
+};
+
+const decryptFromStorage = (key) => {
+  const encryptedData = localStorage.getItem(key);
+  if (!encryptedData) return null;
+  try {
+    const bytes = CryptoJS.AES.decrypt(encryptedData, SECRET_KEY);
+    return bytes.toString(CryptoJS.enc.Utf8);
+  } catch (err) {
+    console.error(`Error decrypting ${key}:`, err);
+    return null;
+  }
+};
+
+export const decryptedEmail = decryptFromStorage("email");
+export const decryptedPassword = decryptFromStorage("password");
+
+export const PrivateRoute = ({ children }) => {
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+  if (!mounted) return null;
+  const login = isLogin();
+  return login ? children : <Navigate to="/auth/login" replace />;
 };

@@ -1,5 +1,5 @@
 import { useEffect } from "react";
-import { Outlet } from "react-router-dom";
+import { Outlet, useNavigate } from "react-router-dom";
 import AOS from "aos";
 
 // Header & Footer
@@ -11,8 +11,11 @@ import Hash from "../Components/Hash";
 
 // Scroll To Top
 import useScrollToTop from "../Components/useScrollToTop";
+import { PrivateRoute } from "../helpers/utils";
 
 const Index = () => {
+  const navigate = useNavigate();
+
   // Scroll To Top
   useScrollToTop();
 
@@ -28,8 +31,9 @@ const Index = () => {
     <div className="">
       <Hash />
       <Header />
-      <Outlet />
-      <Footer />
+      <PrivateRoute>
+        <Outlet />
+      </PrivateRoute>
     </div>
   );
 };

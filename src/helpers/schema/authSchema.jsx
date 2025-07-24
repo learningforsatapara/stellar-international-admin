@@ -48,3 +48,10 @@ export const resetPasswordValidationSchema = Yup.object().shape({
     )
     .required("Please enter confirm new password"),
 });
+
+export const ThemeValidation = Yup.object({
+  image: Yup.string()
+    .required("Image is required")
+    .url("Uploaded image URL is invalid"),
+  name: Yup.string().required("Image name is required"),
+});

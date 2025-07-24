@@ -1,9 +1,17 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { Modal } from "antd";
+import { useFormik } from "formik";
+import { useDispatch, useSelector } from "react-redux";
 import imageCompression from "browser-image-compression";
 
 // Image
-import Close from "../../assets/Images/Icons/Close.svg";
+import Close from "../../assets/image/default/close-icon.svg";
+
+// Theme Validation
+import { ThemeValidation } from "../../helpers/schema/authSchema";
+
+// Redux
+import { AddTheme } from "../../Redux/Redux";
 
 // Close Icon Image
 const CloseIcon = () => <img src={Close} alt="close" />;
@@ -38,6 +46,177 @@ export const BasicModal = ({ isOpen, cancelSuperHandler }) => {
       className="basic-modal"
     >
       <GoRebel />
+    </Modal>
+  );
+};
+
+// Theme
+export const ThemeModal = ({ data, isOpen, cancelHandler, successHandler }) => {
+  const isEdit = Boolean(data);
+  const dispatch = useDispatch();
+
+  const { addThemeLoading } = useSelector((state) => state.loading);
+
+  const headerTitle = isEdit ? `Edit Theme` : `Add Theme`;
+  const [preview, setPreview] = useState(null);
+  const [isDragging, setIsDragging] = useState(false);
+
+  const formik = useFormik({
+    initialValues: {
+      name: null,
+      image: "",
+    },
+    validationSchema: ThemeValidation,
+    onSubmit: (values) => {
+      const formData = new FormData();
+      formData.append("name", values?.name);
+      formData.append("image", values?.image);
+      dispatch(
+        AddTheme(payload, () => {
+          successHandler();
+        })
+      );
+    },
+  });
+
+  const handleFile = (file) => {
+    if (file && file.type.startsWith("image/")) {
+      setPreview(URL.createObjectURL(file));
+      formik.setFieldValue("image", file);
+    } else {
+      formik.setFieldError("image", "Please upload a valid image file.");
+    }
+  };
+
+  const handleDrop = (e) => {
+    e.preventDefault();
+    setIsDragging(false);
+    const file = e.dataTransfer.files[0];
+    handleFile(file);
+  };
+
+  const handleDragOver = (e) => {
+    e.preventDefault();
+    setIsDragging(true);
+  };
+
+  const handleDragLeave = () => {
+    setIsDragging(false);
+  };
+
+  const handleBrowse = (e) => {
+    const file = e.target.files[0];
+    handleFile(file);
+  };
+
+  useEffect(() => {
+    if (isOpen) {
+      formik.resetForm();
+      if (data) {
+        const { image, name } = data;
+        formik.setFieldValue("image", image);
+        formik.setFieldValue("name", name);
+        if (image) setPreview(image);
+      } else {
+        setPreview(null);
+      }
+    }
+  }, [isOpen]);
+
+  return (
+    <Modal
+      open={isOpen}
+      onCancel={cancelHandler}
+      maskClosable={false}
+      closable={true}
+      centered={true}
+      closeIcon={<CloseIcon />}
+      width={"576px"}
+      footer={null}
+      className="modelMaxHeight lone-modal"
+    >
+      <div className="modal-content">
+        <h3 className="text-center my-3 fs-2 fw-c-semiBold">{headerTitle}</h3>
+
+        <form
+          onSubmit={formik.handleSubmit}
+          noValidate
+          className="row g-4 mt-0"
+        >
+          {/* Image Name */}
+          <div className="col-lg-12">
+            <label className="form-label">Name</label>
+            <input
+              type="text"
+              name="name"
+              className={`form-control form-control-lg fs-6 ${
+                formik.touched.name && formik.errors.name ? "is-invalid" : ""
+              }`}
+              placeholder="Enter Theme Name"
+              value={formik.values.name}
+              onChange={formik.handleChange}
+              onBlur={formik.handleBlur}
+            />
+            <div className="invalid-feedback">{formik.errors.name || ""}</div>
+          </div>
+
+          {/* Image Upload */}
+          <div
+            onDrop={handleDrop}
+            onDragOver={handleDragOver}
+            onDragLeave={handleDragLeave}
+            className={`col-12 ${isDragging ? "bg-light" : ""}`}
+            style={{ cursor: "pointer" }}
+            onClick={() => document.getElementById("fileInput").click()}
+          >
+            <div
+              className="border border-2 p-4 text-center rounded align-content-center"
+              style={{ minHeight: 100 }}
+            >
+              <input
+                type="file"
+                id="fileInput"
+                accept="image/*"
+                hidden
+                onChange={handleBrowse}
+                onBlur={formik.handleBlur}
+              />
+              {preview ? (
+                <img
+                  src={preview}
+                  alt="Preview"
+                  className="img-thumbnail"
+                  style={{ maxWidth: "200px" }}
+                />
+              ) : (
+                <p className="fs-6">
+                  Drag & drop image here or <u>Click to browse</u>
+                </p>
+              )}
+            </div>
+
+            {formik.touched.image && formik.errors.image && (
+              <div className="small mt-1 text-danger">
+                {formik.errors.image}
+              </div>
+            )}
+          </div>
+
+          {/* Submit */}
+          <div className="text-center">
+            <button type="submit" className="btn btn-primary btn-lg px-3">
+              {isEdit ? `Update` : `Save`}{" "}
+              {addThemeLoading && (
+                <Spin
+                  indicator={<LoadingOutlined spin />}
+                  size="medium"
+                  className="text-white ms-2"
+                />
+              )}
+            </button>
+          </div>
+        </form>
+      </div>
     </Modal>
   );
 };

@@ -61,11 +61,34 @@ const msgReducer = (
   }
 };
 
+const ThemeReducer = (
+  state = {
+    theme: [],
+  },
+  action
+) => {
+  switch (action.type) {
+    case "GET_THEME":
+      return {
+        ...state,
+        theme: action.payload,
+      };
+    case "CLEAR_DATA":
+      return {
+        ...state,
+        theme: {},
+      };
+    default:
+      return state;
+  }
+};
+
 const store = configureStore({
   reducer: combineReducers({
     error: errorReducer,
     loading: loadingReducer,
     msg: msgReducer,
+    theme:ThemeReducer,
   }),
 });
 
