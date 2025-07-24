@@ -46,6 +46,24 @@ export const AddTheme = (body, setState) => async (dispatch) => {
     });
 };
 
+export const UpdateTheme = (id, body, setState) => async (dispatch) => {
+  dispatchLoading(dispatch, "updateTheme", true);
+  axios
+    .put(`${API_URL}/themes/${id}`, body)
+    .then((result) => {
+      if (result?.status) {
+        setState && setState();
+        dispatchToast(dispatch, "success", result?.data?.message);
+        dispatchError(dispatch, "updateTheme", undefined);
+      } else elseHandler(dispatch, "updateTheme", result?.data);
+      dispatchLoading(dispatch, "updateTheme", false);
+    })
+    .catch((err) => {
+      dispatchToast(dispatch, "error", err?.response?.data?.message);
+      dispatchLoading(dispatch, "updateTheme", false);
+    });
+};
+
 export const DeletTheme = (id, setState) => async (dispatch) => {
   dispatchLoading(dispatch, "deleteTheme", true);
   axios

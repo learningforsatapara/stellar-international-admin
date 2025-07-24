@@ -1,16 +1,20 @@
 import React, { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
+import { Card, Empty, Modal } from "antd";
 
 // Icon
+import svg from "../../assets/svg";
 import { DeleteOutlined, EditOutlined } from "@ant-design/icons";
 import ThemePlaceholder from "../../assets/image/ThemePlaceholder.svg";
 
 // Redux
 import { DeletTheme, GetTheme } from "../../Redux/Redux";
-import { Card, Empty, Modal, Typography } from "antd";
+
+// Helpers
 import { momentDDMMYY } from "../../helpers/utils";
+
+// Modal
 import { ThemeModal } from "../../Components/Modal/Modal";
-import svg from "../../assets/svg";
 
 const Index = () => {
   // Use
