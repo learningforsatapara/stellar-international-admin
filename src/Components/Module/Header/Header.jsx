@@ -1,12 +1,17 @@
 import React from "react";
-import { NavLink } from "react-router-dom";
+import { useDispatch } from "react-redux";
+import { NavLink, useNavigate } from "react-router-dom";
 
 // SCSS
 import "./style.scss";
 
 import Logo from "../../../assets/image/logo.png";
+import svg from "../../../assets/svg";
+import { dispatchToast } from "../../../helpers/utils";
 
 const Header = () => {
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
   return (
     <header className="header py-3">
       <div className="container-fluid">
@@ -21,6 +26,22 @@ const Header = () => {
             <NavLink className="nav-link" to="/package">
               Package
             </NavLink>
+            <button
+              className="nav-link logout-btn"
+              onClick={() => {
+                localStorage.removeItem("email");
+                localStorage.removeItem("password");
+                localStorage.removeItem("loginStatus");
+                navigate("/auth/login");
+                dispatchToast(
+                  dispatch,
+                  "success",
+                  "👋 You have been logged out successfully."
+                );
+              }}
+            >
+              {svg?.logout}
+            </button>
           </div>
         </div>
       </div>

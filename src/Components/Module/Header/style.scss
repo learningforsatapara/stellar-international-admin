@@ -32,5 +32,14 @@
         color: #fff;
       }
     }
+
+    .logout-btn {
+      min-width: auto;
+      padding: 0;
+      svg {
+        width: 46px;
+        max-height: 46px;
+      }
+    }
   }
 }

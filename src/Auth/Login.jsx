@@ -7,7 +7,7 @@ import CryptoJS from "crypto-js";
 // Assets
 import LoginBackground from "../assets/image/login-background.jpg";
 import { LoadingOutlined } from "@ant-design/icons";
-import { Spin } from "antd";
+import { message, Spin } from "antd";
 
 // CSS
 import "./style.scss";
@@ -15,7 +15,12 @@ import "./style.scss";
 // Validation
 import { loginValidationSchema } from "../helpers/schema/authSchema";
 import { PasswordField } from "../Components/Component";
-import { SECRET_EMAIL, SECRET_KEY, SECRET_PASSWORD } from "../helpers/utils";
+import {
+  dispatchToast,
+  SECRET_EMAIL,
+  SECRET_KEY,
+  SECRET_PASSWORD,
+} from "../helpers/utils";
 
 const Login = () => {
   // Use
@@ -48,6 +53,11 @@ const Login = () => {
         localStorage.setItem("email", encryptedEmail);
         localStorage.setItem("password", encryptedPassword);
         navigate("/");
+        dispatchToast(
+          dispatch,
+          "success",
+          "🎉 Login successful! Welcome back."
+        );
       } else {
         toast.error("Invalid Credentials");
       }
