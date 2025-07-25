@@ -123,7 +123,9 @@ export const GetPackageId = (id, setState) => async (dispatch) => {
 export const AddPackage = (body, setState) => async (dispatch) => {
   dispatchLoading(dispatch, "addPackage", true);
   axios
-    .post(`${API_URL}/packages`, body)
+    .post(`${API_URL}/packages`, body, {
+      headers: { "Content-Type": "multipart/form-data" },
+    })
     .then((result) => {
       if (result?.status) {
         setState && setState();
@@ -141,7 +143,9 @@ export const AddPackage = (body, setState) => async (dispatch) => {
 export const UpdatePackage = (id, body, setState) => async (dispatch) => {
   dispatchLoading(dispatch, "updatePackage", true);
   axios
-    .put(`${API_URL}/packages/${id}`, body)
+    .put(`${API_URL}/packages/${id}`, body, {
+      headers: { "Content-Type": "multipart/form-data" },
+    })
     .then((result) => {
       if (result?.status) {
         setState && setState();
