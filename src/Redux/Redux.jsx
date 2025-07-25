@@ -64,10 +64,10 @@ export const UpdateTheme = (id, body, setState) => async (dispatch) => {
     });
 };
 
-export const DeletTheme = (id, setState) => async (dispatch) => {
+export const DeleteTheme = (id, setState) => async (dispatch) => {
   dispatchLoading(dispatch, "deleteTheme", true);
   axios
-    .delete(`${URL}/themes/${id}`)
+    .delete(`${API_URL}/themes/${id}`)
     .then((result) => {
       if (result?.status) {
         setState && setState();
@@ -79,5 +79,97 @@ export const DeletTheme = (id, setState) => async (dispatch) => {
     .catch((err) => {
       dispatchToast(dispatch, "error", err?.response?.data?.message);
       dispatchLoading(dispatch, "deleteTheme", false);
+    });
+};
+
+export const GetPackage = (body, setState) => async (dispatch) => {
+  dispatchLoading(dispatch, "package", true);
+  axios
+    .post(`${API_URL}/packages/filter`, body)
+    .then((result) => {
+      if (result?.status) {
+        setState && setState();
+        dispatch({ type: "GET_PACKAGE", payload: result?.data });
+        dispatchToast(dispatch, "success", result?.data?.message);
+        dispatchError(dispatch, "package", undefined);
+      } else elseHandler(dispatch, "package", result?.data);
+      dispatchLoading(dispatch, "package", false);
+    })
+    .catch((err) => {
+      dispatchToast(dispatch, "error", err?.response?.data?.message);
+      dispatchLoading(dispatch, "package", false);
+    });
+};
+
+export const GetPackageId = (id, setState) => async (dispatch) => {
+  dispatchLoading(dispatch, "package", true);
+  axios
+    .post(`${API_URL}/packages/${id}`)
+    .then((result) => {
+      if (result?.status) {
+        setState && setState();
+        dispatch({ type: "GET_PACKAGE_DETAIL", payload: result?.data });
+        dispatchToast(dispatch, "success", result?.data?.message);
+        dispatchError(dispatch, "package", undefined);
+      } else elseHandler(dispatch, "package", result?.data);
+      dispatchLoading(dispatch, "package", false);
+    })
+    .catch((err) => {
+      dispatchToast(dispatch, "error", err?.response?.data?.message);
+      dispatchLoading(dispatch, "package", false);
+    });
+};
+
+export const AddPackage = (body, setState) => async (dispatch) => {
+  dispatchLoading(dispatch, "addPackage", true);
+  axios
+    .post(`${API_URL}/packages`, body)
+    .then((result) => {
+      if (result?.status) {
+        setState && setState();
+        dispatchToast(dispatch, "success", result?.data?.message);
+        dispatchError(dispatch, "addPackage", undefined);
+      } else elseHandler(dispatch, "addPackage", result?.data);
+      dispatchLoading(dispatch, "addPackage", false);
+    })
+    .catch((err) => {
+      dispatchToast(dispatch, "error", err?.response?.data?.message);
+      dispatchLoading(dispatch, "addPackage", false);
+    });
+};
+
+export const UpdatePackage = (id, body, setState) => async (dispatch) => {
+  dispatchLoading(dispatch, "updatePackage", true);
+  axios
+    .put(`${API_URL}/packages/${id}`, body)
+    .then((result) => {
+      if (result?.status) {
+        setState && setState();
+        dispatchToast(dispatch, "success", result?.data?.message);
+        dispatchError(dispatch, "updatePackage", undefined);
+      } else elseHandler(dispatch, "updatePackage", result?.data);
+      dispatchLoading(dispatch, "updatePackage", false);
+    })
+    .catch((err) => {
+      dispatchToast(dispatch, "error", err?.response?.data?.message);
+      dispatchLoading(dispatch, "updatePackage", false);
+    });
+};
+
+export const DeletePackage = (id, setState) => async (dispatch) => {
+  dispatchLoading(dispatch, "deletePackage", true);
+  axios
+    .delete(`${API_URL}/packages/${id}`)
+    .then((result) => {
+      if (result?.status) {
+        setState && setState();
+        dispatchToast(dispatch, "success", result?.data?.message);
+        dispatchError(dispatch, "deletePackage", undefined);
+      } else elseHandler(dispatch, "deletePackage", result?.data);
+      dispatchLoading(dispatch, "deletePackage", false);
+    })
+    .catch((err) => {
+      dispatchToast(dispatch, "error", err?.response?.data?.message);
+      dispatchLoading(dispatch, "deletePackage", false);
     });
 };

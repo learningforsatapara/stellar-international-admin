@@ -55,3 +55,35 @@ export const ThemeValidation = Yup.object({
     .url("Uploaded image URL is invalid"),
   name: Yup.string().required("Image name is required"),
 });
+
+export const PackageValidation = Yup.object().shape({
+  // name: Yup.string().required("Required"),
+  // description: Yup.string().required("Required"),
+  // duration: Yup.string().required("Required"),
+  // themeId: Yup.string().required("Required"),
+  // locations: Yup.array().of(
+  //   Yup.object().shape({
+  //     name: Yup.string().required("Location name required"),
+  //     description: Yup.string().required("Location description required"),
+  //     image: Yup.mixed().required("Location image required"),
+  //   })
+  // ),
+  name: Yup.string().required("Name is required"),
+  description: Yup.string().required("Description is required"),
+  duration: Yup.string().required("Duration is required"),
+  theme: Yup.string().required("Theme is required"),
+  service: Yup.array()
+    .of(Yup.string())
+    .min(1, "At least one service is required")
+    .required("Service is required"),
+  tourType: Yup.string().required("Tour type is required"),
+  tourImages: Yup.array()
+    .of(
+      Yup.mixed().test(
+        "fileType",
+        "Only images allowed",
+        (file) => file && file.type && file.type.startsWith("image/")
+      )
+    )
+    .min(1, "At least one image is required"),
+});

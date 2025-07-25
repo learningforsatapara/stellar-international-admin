@@ -8,7 +8,7 @@ import { DeleteOutlined, EditOutlined } from "@ant-design/icons";
 import ThemePlaceholder from "../../assets/image/ThemePlaceholder.svg";
 
 // Redux
-import { DeletTheme, GetTheme } from "../../Redux/Redux";
+import { DeleteTheme, GetTheme } from "../../Redux/Redux";
 
 // Helpers
 import { momentDDMMYY } from "../../helpers/utils";
@@ -46,7 +46,7 @@ const Index = () => {
 
   return (
     <div className="page">
-      <div className="container">
+      <div className="container-fluid overflow-hidden">
         <div className="d-flex align-items-center justify-content-between">
           <h1 className="title">Theme</h1>
           <button
@@ -153,7 +153,7 @@ const Index = () => {
           const id = deleteTheme?.content?._id;
           if (id) {
             dispatch(
-              DeletTheme(id, () => {
+              DeleteTheme(id, () => {
                 setDeleteTheme({ open: false, content: {} });
                 reCall();
               })
