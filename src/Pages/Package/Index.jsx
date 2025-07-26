@@ -1,10 +1,9 @@
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
-import { Card, Empty, Modal, Table } from "antd";
+import { Card, Empty, Modal, Tooltip } from "antd";
 
 // Icon
-import svg from "../../assets/svg";
 import {
   DeleteOutlined,
   EditOutlined,
@@ -17,25 +16,40 @@ import { DeletePackage, GetPackage } from "../../Redux/Redux";
 
 // Helpers
 import { momentDDMMYY } from "../../helpers/utils";
+import svg from "../../assets/svg";
 
 const Index = () => {
   // Use
   const dispatch = useDispatch();
   const navigate = useNavigate();
+
   // Selector
   const { packages } = useSelector((state) => state.package);
-  const { packageLoading } = useSelector((state) => state.loading);
 
   const [deletePackage, setDeletePackage] = useState({
     open: false,
     content: {},
   });
 
+  const reCall = () => {
+    dispatch(
+      GetPackage({
+        is_domestic_international: "0",
+      })
+    );
+  };
+
+  useEffect(() => {
+    reCall();
+  }, []);
   return (
     <div className="page">
       <div className="container-fluid overflow-hidden">
         <div className="d-flex align-items-center justify-content-between mb-4">
-          <h1 className="title">Package</h1>
+          <h1 className="title">
+            Package {packages?.length ? `(${packages?.length})` : ``}
+          </h1>
+
           <button
             className="btn btn-primary rounded-pill"
             onClick={() => navigate("/package/add")}
@@ -43,151 +57,6 @@ const Index = () => {
             Add
           </button>
         </div>
-
-        {/* <div className="card card-shadow rounded-4 border-0 overflow-hidden mb-4">
-          <div className="card-body p-0 shadow-sm">
-            <Table
-              dataSource={packageLoading || []}
-              className={"antTable"}
-              loading={packageLoading}
-              pagination={false}
-              scroll={{ x: 768 }}
-              columns={
-                ({
-                  title: "Name",
-                  dataIndex: "name",
-                  key: "name",
-                  className: "text-capitalize",
-                },
-                {
-                  title: "Theme ID",
-                  dataIndex: "themeId",
-                  key: "themeId",
-                  className: "text-capitalize",
-                  render: (themeId) => (themeId?.name ? themeId?.name : "-"),
-                },
-                {
-                  title: "Domestic/International",
-                  dataIndex: "is_domestic_international",
-                  key: "is_domestic_international",
-                  className: "text-capitalize",
-                  render: (value) =>
-                    value === "1" ? "Domestic" : "International",
-                },
-                {
-                  title: "Duration",
-                  dataIndex: "duration",
-                  key: "duration",
-                  className: "text-capitalize",
-                },
-                {
-                  title: "Services",
-                  dataIndex: "services",
-                  key: "services",
-                  className: "text-capitalize",
-                  render: (services = []) => {
-                    const provider = dpList(services || [], 3);
-                    const { list, length, sliceLength, sliceList } =
-                      provider || {};
-
-                    return (
-                      <Flex gap="4px 0" wrap className="last-item-m-0">
-                        {list?.map((ele, index) => (
-                          <Tag key={index} style={PopOverStyle}>
-                            {ele?.name}
-                          </Tag>
-                        ))}
-
-                        {length > sliceLength && (
-                          <Popover
-                            content={
-                              <>
-                                <Flex
-                                  gap="4px 0"
-                                  wrap
-                                  className="last-item-m-0"
-                                >
-                                  {sliceList?.map((ele, index) => (
-                                    <Tag key={index} style={PopOverStyle}>
-                                      {ele?.name}
-                                    </Tag>
-                                  ))}
-                                </Flex>
-                              </>
-                            }
-                            trigger="hover"
-                          >
-                            <Tag style={PopOverStyle}>
-                              +{length - sliceLength}
-                            </Tag>
-                          </Popover>
-                        )}
-                      </Flex>
-                    );
-                  },
-                },
-                {
-                  title: "Created",
-                  dataIndex: "createdAt",
-                  key: "createdAt",
-                  className: "text-capitalize",
-                  render: (val) => formatToIST12Hour(val),
-                },
-                {
-                  title: "Action",
-                  key: "action",
-                  className: "text-capitalize",
-                  align: "center",
-                  render: (_, record) => {
-                    const handleMenuClick = ({ key }) => {
-                      switch (key) {
-                        case "view":
-                          setPackageDetail({ open: true, data: record });
-                          break;
-                        case "edit":
-                          setDetail({ open: true, data: record });
-                          break;
-                        case "delete":
-                          handleDelete(record._id);
-                          break;
-                        default:
-                          break;
-                      }
-                    };
-
-                    const menu = (
-                      <Menu onClick={handleMenuClick}>
-                        <Menu.Item key="view" icon={<EyeOutlined />}>
-                          View
-                        </Menu.Item>
-                        <Menu.Item key="edit" icon={<EditOutlined />}>
-                          Edit
-                        </Menu.Item>
-                        <Menu.Item
-                          key="delete"
-                          icon={<DeleteOutlined />}
-                          danger
-                        >
-                          Delete
-                        </Menu.Item>
-                      </Menu>
-                    );
-
-                    return (
-                      <Dropdown
-                        overlay={menu}
-                        trigger={["click"]}
-                        placement="bottomRight"
-                      >
-                        <Button icon={<EllipsisOutlined />} />
-                      </Dropdown>
-                    );
-                  },
-                })
-              }
-            />
-          </div>
-        </div> */}
 
         <div className="row mb-4">
           {packages?.map((item, index) => (
@@ -212,39 +81,72 @@ const Index = () => {
                   />
                 }
                 actions={[
-                  <InfoCircleOutlined style={{ color: "var(--dark-blue)" }} />,
-                  <EditOutlined
-                    style={{ color: "var(--dark-blue)" }}
-                    onClick={() =>
-                      setEditTheme({
-                        open: true,
-                        content: { ...item },
-                      })
-                    }
-                  />,
-                  <DeleteOutlined
-                    style={{ color: "var(--orange)" }}
-                    onClick={() =>
-                      setDeleteTheme({
-                        open: true,
-                        content: { ...item, index },
-                      })
-                    }
-                  />,
+                  <Tooltip
+                    title="Package Detail"
+                    key="detail"
+                    overlayInnerStyle={{
+                      backgroundColor: "#f0f9ff", // light blue
+                      color: "var(--dark-blue)", // dark blue text
+                      borderRadius: 8,
+                      boxShadow: "0 4px 8px rgba(0, 0, 0, 0.15)",
+                    }}
+                  >
+                    <InfoCircleOutlined
+                      style={{ color: "var(--dark-blue)" }}
+                      onClick={() => navigate(`/package/${item?._id}/detail`)}
+                    />
+                  </Tooltip>,
+                  <Tooltip
+                    title="Package Edit"
+                    key="edit"
+                    overlayInnerStyle={{
+                      backgroundColor: "#f0f9ff", // light blue
+                      color: "var(--dark-blue)", // dark blue text
+                      borderRadius: 8,
+                      boxShadow: "0 4px 8px rgba(0, 0, 0, 0.15)",
+                    }}
+                  >
+                    <EditOutlined
+                      style={{ color: "var(--dark-blue)" }}
+                      onClick={() => navigate(`/package/${item?._id}/edit`)}
+                    />
+                  </Tooltip>,
+                  <Tooltip
+                    title="Package Delete"
+                    key="delete"
+                    overlayInnerStyle={{
+                      backgroundColor: "#f0f9ff", // light blue
+                      color: "#f44336", // dark blue text
+                      borderRadius: 8,
+                      boxShadow: "0 4px 8px rgba(0, 0, 0, 0.15)",
+                    }}
+                  >
+                    <DeleteOutlined
+                      style={{ color: "#f44336" }}
+                      onClick={() =>
+                        setDeletePackage({
+                          open: true,
+                          content: { ...item, index },
+                        })
+                      }
+                    />
+                  </Tooltip>,
                 ]}
               >
                 <Card.Meta
-                  title={`${item.name}`}
+                  title={
+                    <p className="mb-0 text-primary-2 fs-5">{item.name}</p>
+                  }
                   description={
                     <>
                       <p className="d-flex align-items-center justify-content-between flex-wrap mb-0">
                         <span className="text-capitalize">
-                          Theme: {item?.themeId?.name}
+                          Theme : {item?.themeId?.name}
                         </span>
                       </p>
                       <p className="d-flex align-items-center justify-content-between flex-wrap mb-0">
                         <span className="text-capitalize">
-                          Type:{" "}
+                          Type :{" "}
                           {item?.is_domestic_international === "1"
                             ? `Domestic`
                             : `International`}
@@ -252,7 +154,7 @@ const Index = () => {
                       </p>
                       <p className="d-flex align-items-center justify-content-between flex-wrap mb-0">
                         <span className="text-capitalize">
-                          Created on: {momentDDMMYY(item?.createdAt)}
+                          Created on : {momentDDMMYY(item?.createdAt)}
                         </span>
                       </p>
                     </>
@@ -261,8 +163,51 @@ const Index = () => {
               </Card>
             </div>
           ))}
+
+          {packages?.length <= 0 && (
+            <Empty
+              className="mt-4"
+              image={svg?.NoPackagePlaceholder}
+              styles={{ image: { height: 100 } }}
+              description={
+                <span className="text-primary-2">No Package Available</span>
+              }
+            >
+              <button
+                className="btn btn-primary rounded-pill"
+                onClick={() => navigate("/package/add")}
+              >
+                Add
+              </button>
+            </Empty>
+          )}
         </div>
       </div>
+
+      <Modal
+        title={`Delete ${deletePackage?.content?.name} Package`}
+        open={deletePackage?.open}
+        onOk={() => {
+          const id = deletePackage?.content?._id;
+          if (id) {
+            dispatch(
+              DeletePackage(id, () => {
+                setDeletePackage({ open: false, content: {} });
+                reCall();
+              })
+            );
+          }
+        }}
+        onCancel={() => setDeletePackage({ open: false, content: {} })}
+        okText="Delete Package"
+        cancelText="Cancel"
+        centered={true}
+      >
+        <p>
+          Are you sure you want to delete{" "}
+          <strong>{deletePackage?.content?.name}</strong> ?
+        </p>
+      </Modal>
     </div>
   );
 };

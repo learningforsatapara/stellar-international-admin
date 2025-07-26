@@ -36,9 +36,9 @@ const Login = lazy(() => import("./Auth/Login.jsx"));
 const Index = lazy(() => import("./Pages/Index.jsx"));
 const Home = lazy(() => import("./Pages/Home.jsx"));
 const ThemeIndex = lazy(() => import("./Pages/Theme/Index.jsx"));
-const Theme = lazy(() => import("./Pages/Theme/Index.jsx"));
 const PackageIndex = lazy(() => import("./Pages/Package/Index.jsx"));
 const Package = lazy(() => import("./Pages/Package/Package.jsx"));
+const PackageDetail = lazy(() => import("./Pages/Package/Detail.jsx"));
 
 // Create root for React 18
 createRoot(document.getElementById("root")).render(
@@ -66,13 +66,12 @@ createRoot(document.getElementById("root")).render(
                     <Route path="" element={<Home />} />
                     <Route path="theme">
                       <Route path="" element={<ThemeIndex />} />
-                      <Route path="add" element={<Theme />} />
-                      <Route path=":id/edit" element={<Theme />} />
                     </Route>
                     <Route path="package">
                       <Route path="" element={<PackageIndex />} />
                       <Route path="add" element={<Package />} />
                       <Route path=":id/edit" element={<Package />} />
+                      <Route path=":id/detail" element={<PackageDetail />} />
                     </Route>
                     <Route path="*" element={<PageNotFound />} />
                   </Route>

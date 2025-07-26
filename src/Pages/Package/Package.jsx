@@ -1,28 +1,81 @@
-import React, { useEffect, useState } from "react";
-import { FieldArray, useFormik } from "formik";
+import { useEffect, useState } from "react";
+import { useFormik } from "formik";
 import { useDispatch, useSelector } from "react-redux";
-import { Button, Card, Empty, Input, Modal, Upload } from "antd";
+import { Button, Card, Input, Radio, Select, Upload } from "antd";
 import { useNavigate, useParams } from "react-router-dom";
 
 // Icon
-import svg from "../../assets/svg";
-import { DeleteOutlined, EditOutlined } from "@ant-design/icons";
-import { PlusOutlined, UploadOutlined } from "@ant-design/icons";
-import ThemePlaceholder from "../../assets/image/ThemePlaceholder.svg";
+import {
+  PlusOutlined,
+  UploadOutlined,
+  ArrowLeftOutlined,
+} from "@ant-design/icons";
 
 // Redux
 import { AddPackage, GetPackageId, UpdatePackage } from "../../Redux/Redux";
 
 // Helpers
-import { PackageValidation } from "../../helpers/schema/authSchema";
+import {
+  AddPackageValidation,
+  UpdatePackageValidation,
+} from "../../helpers/schema/authSchema";
+
+// Modal
+import {
+  convertLocationsWithImageUrls,
+  convertTourImageUrls,
+} from "../../Components/Modal/Modal";
+
+// Destructure
 import Dragger from "antd/es/upload/Dragger";
+
+// This would typically come from your API or constants
+const serviceOptions = [
+  {
+    name: "Best Flights",
+    description: "Find and book the best domestic and international flights.",
+  },
+  {
+    name: "Accommodation",
+    description: "Stay at hotels, guesthouses, or vacation rentals.",
+  },
+  {
+    name: "Food & Dining",
+    description: "Enjoy curated meal plans and local culinary experiences.",
+  },
+  {
+    name: "Best Trains",
+    description: "Book comfortable and scenic train journeys with ease.",
+  },
+  {
+    name: "Best Cars",
+    description: "Rent cars for local or intercity travel at affordable rates.",
+  },
+  {
+    name: "Tour Guide Services",
+    description: "Hire experienced guides for a richer travel experience.",
+  },
+  {
+    name: "Customization",
+    description: "Tailor your travel package to suit your preferences.",
+  },
+  {
+    name: "Adventure Activities",
+    description:
+      "Explore thrilling adventures like trekking, rafting, and more.",
+  },
+];
 
 const Package = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const { id } = useParams();
 
-  const [images, setImages] = useState([]);
+  const { theme } = useSelector((state) => state.theme);
+  const { addPackageLoading, updatePackageLoading } = useSelector(
+    (state) => state.loading
+  );
+
   const [previewFiles, setPreviewFiles] = useState([]);
 
   const formik = useFormik({
@@ -30,44 +83,61 @@ const Package = () => {
       name: "",
       description: "",
       duration: "",
-      themeId: "",
+      themeId: null,
       is_domestic_international: "1",
       locations: [],
       services: [],
     },
-    validationSchema: PackageValidation,
+    validationSchema: id ? UpdatePackageValidation : AddPackageValidation,
     onSubmit: (values) => {
       const data = new FormData();
+
+      // Append basic fields
       data.append("themeId", values.themeId);
       data.append("name", values.name);
       data.append("description", values.description);
       data.append("duration", values.duration);
       data.append(
-        "locations",
-        JSON.stringify(
-          values.locations.map((loc, i) => ({
-            ...loc,
-            image: loc.image.name, // only name in metadata
-          }))
-        )
-      );
-      data.append("services", JSON.stringify(values.services));
-      data.append(
         "is_domestic_international",
         values.is_domestic_international
       );
+      data.append("services", JSON.stringify(values.services));
 
-      // Append tourImages
-      previewFiles.forEach((file) =>
-        data.append("tourImages", file.originFileObj)
-      );
+      // Prepare locations array with only image name (for backend matching)
+      const processedLocations = values.locations.map((loc) => ({
+        ...loc,
+        image: typeof loc.image === "string" ? loc.image : loc.image.name,
+      }));
 
-      // Optional: Add location images to FormData too if API needs them separately
-      values.locations.forEach((loc, idx) => {
-        data.append(`locationImages[${idx}]`, loc.image);
+      data.append("locations", JSON.stringify(processedLocations));
+
+      // Append location images (only if they are new File objects)
+      values.locations.forEach((loc) => {
+        if (loc.image && typeof loc.image !== "string") {
+          data.append("locationImages", loc.image); // Must match backend field
+        }
       });
 
-      if (id) {
+      // Handle tourImages (new uploads vs existing URLs)
+      const retainedTourImageUrls = [];
+
+      previewFiles.forEach((file) => {
+        if (typeof file === "string") {
+          // Old image URL (e.g., from edit mode)
+          retainedTourImageUrls.push(file);
+        } else if (file.originFileObj) {
+          // New image file
+          data.append("tourImages", file.originFileObj);
+        }
+      });
+
+      // Send existing URLs as JSON string so backend can retain them
+      if (retainedTourImageUrls.length > 0) {
+        data.append("tourImages", JSON.stringify(retainedTourImageUrls));
+      }
+
+      // Submit to backend
+      if (!id) {
         dispatch(
           AddPackage(data, () => {
             navigate("/package");
@@ -82,16 +152,102 @@ const Package = () => {
       }
     },
   });
+
+  useEffect(() => {
+    if (id) {
+      dispatch(
+        GetPackageId(id, (data) => {
+          const {
+            themeId,
+            description,
+            name,
+            duration,
+            is_domestic_international,
+            services,
+            locations,
+            tourImages,
+          } = data || {};
+          formik.setFieldValue("name", name);
+          formik.setFieldValue("description", description);
+          formik.setFieldValue("duration", duration);
+          formik.setFieldValue("themeId", themeId?._id);
+          formik.setFieldValue(
+            "is_domestic_international",
+            is_domestic_international
+          );
+          formik.setFieldValue(
+            "services",
+            services?.map((ele) => ({
+              name: ele?.name,
+              description: ele?.name,
+            }))
+          );
+
+          if (locations?.length) {
+            convertLocationsWithImageUrls(locations).then(
+              (formattedLocations) => {
+                formik.setFieldValue("locations", formattedLocations);
+              }
+            );
+          }
+
+          if (tourImages?.length) {
+            convertTourImageUrls(tourImages).then((formatted) => {
+              formik.setFieldValue("tourImages", formatted);
+              setPreviewFiles(formatted);
+            });
+          }
+        })
+      );
+    }
+  }, [id, theme]);
+
   return (
     <div className="page">
       <div className="container-fluid overflow-hidden">
         <div className="d-flex align-items-center justify-content-between mb-4">
-          <h1 className="title">Add Package</h1>
+          <h1
+            className="title d-flex gap-2 align-content-center cursor-pointer"
+            onClick={() => navigate("/package")}
+          >
+            <ArrowLeftOutlined style={{ fontSize: 18 }} />
+            {id ? `Edit ${formik?.values?.name}` : `Add`} Package
+          </h1>
+
+          <Button
+            type="primary"
+            size="large"
+            className="shadow-none"
+            onClick={formik.handleSubmit}
+            loading={addPackageLoading || updatePackageLoading}
+          >
+            {id ? "Update Package" : "Add Package"}
+          </Button>
         </div>
 
         <div className="card card-shadow rounded-4 border-0 overflow-hidden mb-4">
           <div className="card-body shadow-sm">
             <form onSubmit={formik.handleSubmit} noValidate className="row g-4">
+              <div className="col-12">
+                <label className="d-block font-medium mb-1">Theme Type</label>{" "}
+                <Radio.Group
+                  value={formik.values.is_domestic_international}
+                  onChange={(e) =>
+                    formik.setFieldValue(
+                      "is_domestic_international",
+                      e.target.value
+                    )
+                  }
+                >
+                  <Radio value="1" className="me-4">
+                    Domestic
+                  </Radio>
+                  <Radio value="2" className="me-4">
+                    International
+                  </Radio>
+                </Radio.Group>
+              </div>
+
               <div className="col-md-6">
                 <label className="form-label">Package Name</label>
                 <input
@@ -154,18 +310,75 @@ const Package = () => {
                 </div>
               </div>
 
+              <div className="col-12">
+                <label className="block font-medium mb-1">Theme</label>{" "}
+                <Select
+                  size="large"
+                  className="w-100"
+                  showSearch
+                  placeholder="Select Theme"
+                  optionFilterProp="label"
+                  value={formik?.values?.themeId}
+                  onChange={(value) => {
+                    formik.setFieldValue("themeId", value);
+                  }}
+                  options={theme?.map((ele) => ({
+                    value: ele?._id,
+                    label: ele?.name,
+                  }))}
+                />
+              </div>
+
+              <div className="col-12">
+                <label className="block font-medium mb-1">Service</label>
+                <Select
+                  size="large"
+                  className="w-100"
+                  showSearch
+                  mode="multiple"
+                  placeholder="Select Services"
+                  value={formik.values.services.map((item) => item.name)}
+                  onChange={(selectedValues) => {
+                    const selectedObjects = serviceOptions.filter((option) =>
+                      selectedValues.includes(option.name)
+                    );
+                    formik.setFieldValue("services", selectedObjects);
+                  }}
+                  optionFilterProp="label"
+                  options={serviceOptions?.map((item) => ({
+                    value: item.name,
+                    label: item.name,
+                  }))}
+                />
+              </div>
+
               {/* LOCATIONS */}
               <div className="col-12">
-                <label className="block font-medium mb-1">Location</label>{" "}
-                <br />
+                <div className="d-flex align-items-center justify-content-between">
+                  <label className="block font-medium">Location</label>
+                  <Button
+                    icon={<PlusOutlined />}
+                    type="primary"
+                    className={`shadow-none ${
+                      formik.values.locations?.length > 0 ? `mb-2` : ``
+                    }`}
+                    onClick={() => {
+                      const updated = [...formik.values.locations];
+                      updated.push({ name: "", description: "", image: null });
+                      formik.setFieldValue("locations", updated);
+                    }}
+                  >
+                    Add Location
+                  </Button>
+                </div>
                 {formik.values.locations.map((loc, index) => (
                   <Card
                     key={index}
-                    title={`Location ${index + 1}`}
-                    style={{ marginBottom: 16 }}
+                    title={loc?.name ? loc?.name : `Location ${index + 1}`}
                     extra={
                       index > 0 && (
                         <Button
+                          size="small"
                           danger
                           onClick={() => {
                             const updated = [...formik.values.locations];
@@ -173,9 +386,14 @@ const Package = () => {
                             formik.setFieldValue("locations", updated);
                           }}
                         >
-                          Remove
+                          Remove Location
                         </Button>
                       )
+                    }
+                    style={
+                      index !== formik?.values?.locations?.length - 1
+                        ? { marginBottom: "1rem" }
+                        : {}
                     }
                   >
                     <Input
@@ -191,11 +409,17 @@ const Package = () => {
                     />
 
                     <Upload
+                      listType="picture"
                       beforeUpload={(file) => {
                         const updated = [...formik.values.locations];
                         updated[index].image = file;
                         formik.setFieldValue("locations", updated);
                         return false;
+                      }}
+                      onRemove={() => {
+                        const updated = [...formik.values.locations];
+                        updated[index].image = null;
+                        formik.setFieldValue("locations", updated);
                       }}
                       fileList={
                         loc.image
@@ -209,34 +433,26 @@ const Package = () => {
                           : []
                       }
                     >
-                      <Button icon={<UploadOutlined />}>
-                        Upload Location Image
-                      </Button>
+                      {!loc.image && (
+                        <Button icon={<UploadOutlined />}>
+                          Upload Location Image
+                        </Button>
+                      )}
                     </Upload>
                   </Card>
                 ))}
-                <Button
-                  size="large"
-                  icon={<PlusOutlined />}
-                  type="dashed"
-                  onClick={() => {
-                    const updated = [...formik.values.locations];
-                    updated.push({ name: "", description: "", image: null });
-                    formik.setFieldValue("locations", updated);
-                  }}
-                >
-                  Add Location
-                </Button>
               </div>
 
               {/* TOUR IMAGES */}
               <div className="col-12">
-                <label className="block font-medium mb-1">Tour Images</label>
+                <label className="d-block font-medium mb-1">Tour Images</label>
                 <Dragger
                   multiple
+                  listType="picture"
                   beforeUpload={() => false}
                   fileList={previewFiles}
                   onChange={({ fileList }) => setPreviewFiles(fileList)}
+                  className="d-block"
                 >
                   <p className="ant-upload-drag-icon">
                     <UploadOutlined />
@@ -247,11 +463,15 @@ const Package = () => {
                 </Dragger>
               </div>
 
-              <div className="col-12"></div>
-
               <div className="col-12">
-                <Button type="primary" htmlType="submit" size="large">
-                  {id ? "Update Package" : "Create Package"}
+                <Button
+                  type="primary"
+                  htmlType="submit"
+                  className="shadow-none"
+                  size="large"
+                  loading={addPackageLoading || updatePackageLoading}
+                >
+                  {id ? "Update Package" : "Add Package"}
                 </Button>
               </div>
             </form>

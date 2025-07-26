@@ -1,10 +1,15 @@
+.cursor-pointer {
+  cursor: pointer;
+}
+
 .page {
-  padding: 3rem 0;
+  padding: 2rem 1.5rem;
 
   .btn {
     min-width: 100px;
     background: var(--dark-blue) !important;
     border-color: var(--dark-blue) !important;
+    padding: 0.5rem 0.5rem;
   }
 }
 
@@ -12,6 +17,7 @@
   font-size: 1.5rem;
   color: var(--dark-blue);
   margin-bottom: 0;
+  font-weight: bold;
   @media screen and (min-width: 768px) {
     font-size: 2rem;
   }
@@ -53,4 +59,108 @@
 
 textarea {
   resize: none;
+}
+
+.lone-modal {
+  .theme-image {
+    max-height: 175px;
+    object-fit: cover;
+    object-position: center;
+    position: absolute;
+    left: 0;
+    top: 0;
+  }
+}
+
+.ant-modal .ant-btn {
+  box-shadow: none;
+}
+
+.page .ant-list {
+  .ant-list-items {
+    display: grid;
+    grid-template-columns: repeat(1, 1fr);
+    gap: 0.5rem;
+    @media screen and (min-width: 768px) {
+      grid-template-columns: repeat(2, 1fr);
+    }
+
+    @media screen and (min-width: 1200px) {
+      grid-template-columns: repeat(3, 1fr);
+    }
+  }
+  .ant-list-item-meta-avatar {
+    margin-inline-end: 0.75rem !important;
+  }
+
+  .ant-list-item-meta {
+    align-items: center !important;
+  }
+  .ant-list-item-meta-avatar {
+    align-content: center;
+  }
+  .ant-image-mask {
+    border-radius: 8px;
+  }
+
+  .ant-list-item {
+    border: none !important;
+  }
+}
+
+.package-drawer .tour-images {
+  grid-gap: 0.5rem;
+  display: grid;
+  gap: 0.5rem;
+  grid-template-columns: repeat(4, 1fr);
+
+  .ant-image img {
+    border-radius: 8px;
+    height: 100%;
+    object-fit: cover;
+    width: 100%;
+  }
+
+  .ant-image-mask {
+    border-radius: 8px;
+  }
+}
+
+.ant-tooltip,
+.ant-tooltip-inner {
+  --antd-arrow-background-color: #fff !important;
+  background: #fff !important;
+}
+
+.cursor-pointer {
+  color: pointer;
+}
+
+.package-detail {
+  h6 {
+    font-size: 1.45rem;
+  }
+}
+
+.antTable {
+  border-radius: 0.625rem !important;
+
+  .ant-table-thead > tr > th {
+    font-weight: 700 !important;
+    font-size: 1rem !important;
+    color: #000000 !important;
+    background-color: #fff !important;
+  }
+
+  .ant-table-tbody > tr > td {
+    font-weight: 400 !important;
+    font-size: 1rem !important;
+    color: #000000 !important;
+  }
+
+  .ant-table-tbody,
+  .ant-table-tbody > tr:last-child,
+  .ant-table-tbody > tr:last-child > td {
+    border-bottom: none !important;
+  }
 }

@@ -4,7 +4,6 @@ import AOS from "aos";
 
 // Header & Footer
 import Header from "../Components/Module/Header/Header";
-import Footer from "../Components/Module/Footer/Footer";
 
 // Scroll to this section with the #element.
 import Hash from "../Components/Hash";
@@ -12,9 +11,12 @@ import Hash from "../Components/Hash";
 // Scroll To Top
 import useScrollToTop from "../Components/useScrollToTop";
 import { PrivateRoute } from "../helpers/utils";
+import { GetPackage, GetTheme } from "../Redux/Redux";
+import { useDispatch } from "react-redux";
 
 const Index = () => {
   const navigate = useNavigate();
+  const dispatch = useDispatch();
 
   // Scroll To Top
   useScrollToTop();
@@ -27,6 +29,17 @@ const Index = () => {
     });
   }, []);
 
+  useEffect(() => {
+    dispatch(GetTheme());
+  }, []);
+
+  useEffect(() => {
+    dispatch(
+      GetPackage({
+        is_domestic_international: "0",
+      })
+    );
+  }, []);
   return (
     <div className="">
       <Hash />

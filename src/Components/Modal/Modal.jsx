@@ -1,17 +1,18 @@
 import React, { useEffect, useState } from "react";
-import { Modal } from "antd";
+import { Modal, Spin } from "antd";
 import { useFormik } from "formik";
 import { useDispatch, useSelector } from "react-redux";
 import imageCompression from "browser-image-compression";
 
 // Image
+import { LoadingOutlined } from "@ant-design/icons";
 import Close from "../../assets/image/default/close-icon.svg";
 
 // Theme Validation
 import { ThemeValidation } from "../../helpers/schema/authSchema";
 
 // Redux
-import { AddTheme } from "../../Redux/Redux";
+import { AddTheme, UpdateTheme } from "../../Redux/Redux";
 
 // Close Icon Image
 const CloseIcon = () => <img src={Close} alt="close" />;
@@ -29,6 +30,65 @@ export const imageCompressorFn = async (file, setState) => {
   } catch (error) {
     setState(file);
   }
+};
+
+export const urlToFile = async (url, fileName = "image.jpg") => {
+  const response = await fetch(url);
+  const blob = await response.blob();
+
+  // Guess the MIME type from the blob or file extension
+  const fileType = blob.type || "image/jpeg";
+
+  return new File([blob], fileName, { type: fileType });
+};
+
+export const convertLocationsWithImageUrls = async (locationsFromApi) => {
+  const updatedLocations = await Promise.all(
+    locationsFromApi.map(async (loc, index) => {
+      const file = await urlToFile(loc.image, loc.image.split("/").pop());
+
+      return {
+        name: loc.name || "",
+        description: loc.description || "",
+        image: {
+          uid: `rc-upload-${Date.now()}-${index}`,
+          name: file.name,
+          status: "done",
+          url: loc.image, // for preview in AntD
+          originFileObj: file, // FormData will use this
+        },
+      };
+    })
+  );
+
+  return updatedLocations;
+};
+
+export const dpList = (data, slice) => {
+  const dataList = data || [];
+  const length = data?.length || 0;
+  const sliceLength = slice || 0;
+  const list =
+    length > sliceLength ? dataList?.slice(0, sliceLength) : dataList;
+  const sliceList = dataList?.slice(sliceLength, length);
+  return { dataList, length, sliceLength, list, sliceList };
+};
+
+export const convertTourImageUrls = async (imageUrls = []) => {
+  const formatted = await Promise.all(
+    imageUrls.map(async (url, index) => {
+      const file = await urlToFile(url, url.split("/").pop());
+
+      return {
+        uid: `rc-upload-${Date.now()}-${index}`,
+        name: file.name,
+        status: "done",
+        url: url,
+        originFileObj: file,
+      };
+    })
+  );
+  return formatted;
 };
 
 // GoRebelModal
@@ -55,7 +115,9 @@ export const ThemeModal = ({ data, isOpen, cancelHandler, successHandler }) => {
   const isEdit = Boolean(data);
   const dispatch = useDispatch();
 
-  const { addThemeLoading } = useSelector((state) => state.loading);
+  const { addThemeLoading, updateThemeLoading } = useSelector(
+    (state) => state.loading
+  );
 
   const headerTitle = isEdit ? `Edit Theme` : `Add Theme`;
   const [preview, setPreview] = useState(null);
@@ -71,15 +133,26 @@ export const ThemeModal = ({ data, isOpen, cancelHandler, successHandler }) => {
       const formData = new FormData();
       formData.append("name", values?.name);
       formData.append("image", values?.image);
-      dispatch(
-        AddTheme(payload, () => {
-          successHandler();
-        })
-      );
+      if (!isEdit) {
+        dispatch(
+          AddTheme(formData, () => {
+            successHandler();
+          })
+        );
+      } else {
+        const formData = new FormData();
+        formData.append("name", values?.name);
+        dispatch(
+          UpdateTheme(data?._id, { name: values?.name }, () => {
+            successHandler();
+          })
+        );
+      }
     },
   });
 
   const handleFile = (file) => {
+    if (isEdit) return;
     if (file && file.type.startsWith("image/")) {
       setPreview(URL.createObjectURL(file));
       formik.setFieldValue("image", file);
@@ -89,6 +162,7 @@ export const ThemeModal = ({ data, isOpen, cancelHandler, successHandler }) => {
   };
 
   const handleDrop = (e) => {
+    if (isEdit) return;
     e.preventDefault();
     setIsDragging(false);
     const file = e.dataTransfer.files[0];
@@ -96,15 +170,18 @@ export const ThemeModal = ({ data, isOpen, cancelHandler, successHandler }) => {
   };
 
   const handleDragOver = (e) => {
+    if (isEdit) return;
     e.preventDefault();
     setIsDragging(true);
   };
 
   const handleDragLeave = () => {
+    if (isEdit) return;
     setIsDragging(false);
   };
 
   const handleBrowse = (e) => {
+    if (isEdit) return;
     const file = e.target.files[0];
     handleFile(file);
   };
@@ -114,9 +191,11 @@ export const ThemeModal = ({ data, isOpen, cancelHandler, successHandler }) => {
       formik.resetForm();
       if (data) {
         const { image, name } = data;
-        formik.setFieldValue("image", image);
         formik.setFieldValue("name", name);
-        if (image) setPreview(image);
+        setPreview(image); // for UI
+        urlToFile(image, image.split("/").pop()).then((file) => {
+          formik.setFieldValue("image", file);
+        });
       } else {
         setPreview(null);
       }
@@ -167,11 +246,15 @@ export const ThemeModal = ({ data, isOpen, cancelHandler, successHandler }) => {
             onDragLeave={handleDragLeave}
             className={`col-12 ${isDragging ? "bg-light" : ""}`}
             style={{ cursor: "pointer" }}
-            onClick={() => document.getElementById("fileInput").click()}
+            onClick={() => {
+              if (!isEdit) {
+                document.getElementById("fileInput").click();
+              }
+            }}
           >
             <div
-              className="border border-2 p-4 text-center rounded align-content-center"
-              style={{ minHeight: 100 }}
+              className="border border-2 p-4 text-center rounded align-content-center position-relative overflow-hidden"
+              style={{ minHeight: 175 }}
             >
               <input
                 type="file"
@@ -185,8 +268,7 @@ export const ThemeModal = ({ data, isOpen, cancelHandler, successHandler }) => {
                 <img
                   src={preview}
                   alt="Preview"
-                  className="img-thumbnail"
-                  style={{ maxWidth: "200px" }}
+                  className="img-fluid w-100 theme-image"
                 />
               ) : (
                 <p className="fs-6">
@@ -206,7 +288,7 @@ export const ThemeModal = ({ data, isOpen, cancelHandler, successHandler }) => {
           <div className="text-center">
             <button type="submit" className="btn btn-primary btn-lg px-3">
               {isEdit ? `Update` : `Save`}{" "}
-              {addThemeLoading && (
+              {(addThemeLoading || updateThemeLoading) && (
                 <Spin
                   indicator={<LoadingOutlined spin />}
                   size="medium"

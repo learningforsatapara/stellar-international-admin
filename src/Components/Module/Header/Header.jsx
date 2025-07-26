@@ -17,7 +17,12 @@ const Header = () => {
       <div className="container-fluid">
         <div className="d-flex align-items-center justify-content-between">
           <div className="logo">
-            <img src={Logo} className="img-fluid" alt="staller international" />
+            <img
+              src={Logo}
+              className="img-fluid cursor-pointer"
+              alt="staller international"
+              onClick={() => navigate("/")}
+            />
           </div>
           <div className="d-flex align-items-center justify-content-between gap-3 nav-list">
             <NavLink className="nav-link" to="/theme">

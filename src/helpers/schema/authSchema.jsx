@@ -50,13 +50,15 @@ export const resetPasswordValidationSchema = Yup.object().shape({
 });
 
 export const ThemeValidation = Yup.object({
-  image: Yup.string()
+  image: Yup.mixed()
     .required("Image is required")
-    .url("Uploaded image URL is invalid"),
+    .test("fileType", "Only image files are allowed", (value) => {
+      return value && value.type && value.type.startsWith("image/");
+    }),
   name: Yup.string().required("Image name is required"),
 });
 
-export const PackageValidation = Yup.object().shape({
+export const UpdatePackageValidation = Yup.object().shape({
   // name: Yup.string().required("Required"),
   // description: Yup.string().required("Required"),
   // duration: Yup.string().required("Required"),
@@ -71,12 +73,97 @@ export const PackageValidation = Yup.object().shape({
   name: Yup.string().required("Name is required"),
   description: Yup.string().required("Description is required"),
   duration: Yup.string().required("Duration is required"),
-  theme: Yup.string().required("Theme is required"),
-  service: Yup.array()
-    .of(Yup.string())
+  themeId: Yup.string().required("Theme is required"),
+  services: Yup.array()
+    .of(
+      Yup.object().shape({
+        name: Yup.string().required("Service name is required"),
+      })
+    )
     .min(1, "At least one service is required")
     .required("Service is required"),
-  tourType: Yup.string().required("Tour type is required"),
+  is_domestic_international: Yup.string().required("Tour type is required"),
+  // locations: Yup.array()
+  //   .of(
+  //     Yup.object({
+  //       name: Yup.string().required("Location name is required"),
+  //       image: Yup.string().required("Image is required"),
+  //     })
+  //   )
+  //   .min(1, "At least one location is required"),
+  locations: Yup.array()
+    .of(
+      Yup.object({
+        name: Yup.string().required("Location name is required"),
+        image: Yup.mixed().test(
+          "is-image-url",
+          "Image is required",
+          function (value) {
+            // Accepts either a string or an object with a `url`
+            return typeof value === "string"
+              ? !!value
+              : value && typeof value.url === "string";
+          }
+        ),
+      })
+    )
+    .min(1, "At least one location is required"),
+  // tourImages: Yup.array()
+  //   .of(
+  //     Yup.mixed().test(
+  //       "fileType",
+  //       "Only images allowed",
+  //       (file) => file && file.type && file.type.startsWith("image/")
+  //     )
+  //   )
+  //   .min(1, "At least one image is required"),
+  tourImages: Yup.array()
+    .of(
+      Yup.mixed().test(
+        "is-valid-image",
+        "Only valid image files or URLs are allowed",
+        (file) => {
+          if (!file) return false;
+
+          // If it's a new file with a type
+          if (file?.type?.startsWith("image/")) return true;
+
+          // If it's an AntD upload object with a URL
+          if (file?.url && typeof file.url === "string") return true;
+
+          // If it's a direct string URL
+          if (typeof file === "string" && file.startsWith("http")) return true;
+
+          return false;
+        }
+      )
+    )
+    .min(1, "At least one image is required"),
+});
+
+export const AddPackageValidation = Yup.object().shape({
+  name: Yup.string().required("Name is required"),
+  description: Yup.string().required("Description is required"),
+  duration: Yup.string().required("Duration is required"),
+  themeId: Yup.string().required("Theme is required"),
+  services: Yup.array()
+    .of(
+      Yup.object().shape({
+        name: Yup.string().required("Service name is required"),
+      })
+    )
+    .min(1, "At least one service is required")
+    .required("Service is required"),
+  is_domestic_international: Yup.string().required("Tour type is required"),
+  locations: Yup.array()
+    .of(
+      Yup.object({
+        name: Yup.string().required("Location name is required"),
+        image: Yup.string().required("Image is required"),
+      })
+    )
+    .min(1, "At least one location is required"),
+
   tourImages: Yup.array()
     .of(
       Yup.mixed().test(

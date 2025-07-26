@@ -7,7 +7,7 @@
   --gray: #969696;
 }
 
-$primary: var(--primary);
+$primary: var(--dark-blue);
 $white: #fff;
 $black: #121212;
 $focus-color: rgba(20, 24, 62, 0.25);
@@ -19,7 +19,7 @@ body,
 .ant-app {
   font-family: "Poppins", sans-serif;
   color: $black;
-  background: #dce5fe;
+  background: #f4f4f4;
 }
 
 body {
@@ -29,7 +29,7 @@ body {
 html {
   font-family: "Poppins", sans-serif;
   scroll-behavior: smooth;
-  background: #dce5feb5;
+  background: #f4f4f4;
 }
 
 // Text color utility

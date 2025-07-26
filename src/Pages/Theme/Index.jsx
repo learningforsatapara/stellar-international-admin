@@ -1,6 +1,6 @@
-import React, { useEffect, useState } from "react";
+import { useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { Card, Empty, Modal } from "antd";
+import { Card, Empty, List, Modal, Tooltip, Typography } from "antd";
 
 // Icon
 import svg from "../../assets/svg";
@@ -15,14 +15,15 @@ import { momentDDMMYY } from "../../helpers/utils";
 
 // Modal
 import { ThemeModal } from "../../Components/Modal/Modal";
+import { useNavigate } from "react-router-dom";
 
 const Index = () => {
   // Use
   const dispatch = useDispatch();
+  const navigate = useNavigate();
 
   // Selector
   const { theme } = useSelector((state) => state.theme);
-  const { themeLoading } = useSelector((state) => state.loading);
 
   const [deleteTheme, setDeleteTheme] = useState({
     open: false,
@@ -38,17 +39,13 @@ const Index = () => {
     dispatch(GetTheme());
   };
 
-  useEffect(() => {
-    reCall();
-  }, []);
-
-  const dataList = [];
-
   return (
     <div className="page">
       <div className="container-fluid overflow-hidden">
         <div className="d-flex align-items-center justify-content-between">
-          <h1 className="title">Theme</h1>
+          <h1 className="title">
+            Theme {theme?.length ? `(${theme?.length})` : ``}
+          </h1>
           <button
             className="btn btn-primary rounded-pill"
             onClick={() => {
@@ -63,8 +60,8 @@ const Index = () => {
         </div>
 
         <div className="row mt-4">
-          {dataList?.map((item, index) => (
-            <div className="col-lg-4 col-xxl-3 mb-4" key={index}>
+          {theme?.map((item, index) => (
+            <div className="col-md-6 col-lg-4 col-xxl-3 mb-4" key={index}>
               <Card
                 className="theme-item antd-card"
                 style={{ width: "100%" }}
@@ -85,34 +82,123 @@ const Index = () => {
                   />
                 }
                 actions={[
-                  <EditOutlined
-                    style={{ color: "var(--orange)" }}
-                    onClick={() =>
-                      setEditTheme({
-                        open: true,
-                        content: { ...item },
-                      })
-                    }
-                  />,
-                  <DeleteOutlined
-                    style={{ color: "var(--orange)" }}
-                    onClick={() =>
-                      setDeleteTheme({
-                        open: true,
-                        content: { ...item, index },
-                      })
-                    }
-                  />,
+                  <Tooltip
+                    title="Edit Theme"
+                    key="edit"
+                    overlayInnerStyle={{
+                      backgroundColor: "#f0f9ff", // light blue
+                      color: "var(--dark-blue)", // dark blue text
+                      borderRadius: 8,
+                      boxShadow: "0 4px 8px rgba(0, 0, 0, 0.15)",
+                    }}
+                  >
+                    <EditOutlined
+                      style={{ color: "var(--dark-blue)" }}
+                      onClick={() =>
+                        setEditTheme({
+                          open: true,
+                          content: { ...item },
+                        })
+                      }
+                    />
+                  </Tooltip>,
+                  <Tooltip
+                    title="Delete Theme"
+                    key="delete"
+                    overlayInnerStyle={{
+                      backgroundColor: "#f0f9ff", // light blue
+                      color: "#f44336", // dark blue text
+                      borderRadius: 8,
+                      boxShadow: "0 4px 8px rgba(0, 0, 0, 0.15)",
+                    }}
+                  >
+                    <DeleteOutlined
+                      style={{ color: "#f44336" }}
+                      onClick={() =>
+                        setDeleteTheme({
+                          open: true,
+                          content: { ...item, index },
+                        })
+                      }
+                    />
+                  </Tooltip>,
                 ]}
               >
                 <Card.Meta
-                  title={`${item.name} (${item?.package?.length})`}
+                  title={
+                    <p className="mb-0 text-primary-2 fs-5">
+                      {item.name}
+                      {item?.package?.length > 0 && (
+                        <span className="text-primary-2 fw-semibold ms-auto cursor-pointer">
+                          <Tooltip
+                            overlayInnerStyle={{
+                              backgroundColor: "#f0f9ff", // light blue
+                              color: "var(--dark-blue)", // dark blue text
+                              borderRadius: 8,
+                              boxShadow: "0 4px 8px rgba(0, 0, 0, 0.15)",
+                            }}
+                            title={
+                              <List
+                                size="small"
+                                dataSource={item?.package}
+                                renderItem={(ele) => (
+                                  <List.Item
+                                    className="cursor-pointer"
+                                    onClick={() =>
+                                      navigate(`/package/${ele?._id}/detail`)
+                                    }
+                                  >
+                                    <Typography.Text>
+                                      {ele?.name}
+                                    </Typography.Text>
+                                  </List.Item>
+                                )}
+                              />
+                            }
+                          >
+                            <span className="cursor-pointer">
+                              ({item?.package?.length})
+                            </span>
+                          </Tooltip>
+                        </span>
+                      )}
+                    </p>
+                  }
                   description={
                     <>
                       <p className="d-flex align-items-center justify-content-between flex-wrap mb-0">
-                        <b className="fw-semibold text-capitalize">
+                        <span className="text-capitalize">
+                          Total Package:{" "}
+                          <span className="text-primary-2 fw-semibold">
+                            <Tooltip
+                              title={
+                                <List
+                                  size="small"
+                                  dataSource={item?.package}
+                                  renderItem={(ele) => (
+                                    <List.Item
+                                      className="cursor-pointer"
+                                      onClick={() =>
+                                        navigate(`/package/${ele?._id}/detail`)
+                                      }
+                                    >
+                                      <Typography.Text>
+                                        {ele?.name}
+                                      </Typography.Text>
+                                    </List.Item>
+                                  )}
+                                />
+                              }
+                            >
+                              {item?.package?.length}
+                            </Tooltip>
+                          </span>
+                        </span>
+                      </p>
+                      <p className="d-flex align-items-center justify-content-between flex-wrap mb-0">
+                        <span className="text-capitalize">
                           Created on: {momentDDMMYY(item?.createdAt)}
-                        </b>
+                        </span>
                       </p>
                     </>
                   }
@@ -121,7 +207,7 @@ const Index = () => {
             </div>
           ))}
 
-          {dataList?.length <= 0 && (
+          {theme?.length <= 0 && (
             <Empty
               className="mt-4"
               image={svg?.NoThemePlaceholder}
