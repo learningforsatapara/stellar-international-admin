@@ -28,6 +28,7 @@ import {
 
 // Destructure
 import Dragger from "antd/es/upload/Dragger";
+import { dispatchToast } from "../../helpers/utils";
 
 // This would typically come from your API or constants
 const serviceOptions = [
@@ -65,6 +66,9 @@ const serviceOptions = [
       "Explore thrilling adventures like trekking, rafting, and more.",
   },
 ];
+
+// File
+const allowedTypes = ["image/jpeg", "image/jpg", "image/png", "image/webp"];
 
 const Package = () => {
   const dispatch = useDispatch();
@@ -202,6 +206,21 @@ const Package = () => {
     }
   }, [id, theme]);
 
+  const handleImageChange = ({ fileList }) => {
+    const validFiles = [];
+    fileList.forEach((file) => {
+      if (allowedTypes.includes(file.type)) {
+        validFiles.push(file);
+      } else {
+        dispatchToast(
+          dispatch,
+          "error",
+          `${file.name} is not a valid image format. Allowed: jpeg, jpg, png, webp`
+        );
+      }
+    });
+    setPreviewFiles(validFiles);
+  };
   return (
     <div className="page">
       <div className="container-fluid overflow-hidden">
@@ -410,11 +429,26 @@ const Package = () => {
 
                     <Upload
                       listType="picture"
+                      // beforeUpload={(file) => {
+                      //   const updated = [...formik.values.locations];
+                      //   updated[index].image = file;
+                      //   formik.setFieldValue("locations", updated);
+                      //   return false;
+                      // }}
                       beforeUpload={(file) => {
+                        if (!allowedTypes.includes(file.type)) {
+                          dispatchToast(
+                            dispatch,
+                            "error",
+                            `${file.name} is not a valid image format. Allowed: jpeg, jpg, png, webp`
+                          );
+                          return false;
+                        }
+
                         const updated = [...formik.values.locations];
                         updated[index].image = file;
                         formik.setFieldValue("locations", updated);
-                        return false;
+                        return false; // Prevent auto-upload
                       }}
                       onRemove={() => {
                         const updated = [...formik.values.locations];
@@ -451,7 +485,7 @@ const Package = () => {
                   listType="picture"
                   beforeUpload={() => false}
                   fileList={previewFiles}
-                  onChange={({ fileList }) => setPreviewFiles(fileList)}
+                  onChange={handleImageChange}
                   className="d-block"
                 >
                   <p className="ant-upload-drag-icon">

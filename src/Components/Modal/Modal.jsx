@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { Modal, Spin } from "antd";
+import { message, Modal, Spin } from "antd";
 import { useFormik } from "formik";
 import { useDispatch, useSelector } from "react-redux";
 import imageCompression from "browser-image-compression";
@@ -13,6 +13,7 @@ import { ThemeValidation } from "../../helpers/schema/authSchema";
 
 // Redux
 import { AddTheme, UpdateTheme } from "../../Redux/Redux";
+import { dispatchToast } from "../../helpers/utils";
 
 // Close Icon Image
 const CloseIcon = () => <img src={Close} alt="close" />;
@@ -151,13 +152,32 @@ export const ThemeModal = ({ data, isOpen, cancelHandler, successHandler }) => {
     },
   });
 
+  // const handleFile = (file) => {
+  //   if (isEdit) return;
+  //   if (file && file.type.startsWith("image/")) {
+  //     setPreview(URL.createObjectURL(file));
+  //     formik.setFieldValue("image", file);
+  //   } else {
+  //     formik.setFieldError("image", "Please upload a valid image file.");
+  //   }
+  // };
+
   const handleFile = (file) => {
     if (isEdit) return;
-    if (file && file.type.startsWith("image/")) {
+
+    const allowedTypes = /jpeg|jpg|png|webp/;
+    const fileType = file?.type.split("/")[1];
+
+    if (file && file.type.startsWith("image/") && allowedTypes.test(fileType)) {
       setPreview(URL.createObjectURL(file));
       formik.setFieldValue("image", file);
     } else {
-      formik.setFieldError("image", "Please upload a valid image file.");
+      dispatchToast(
+        dispatch,
+        "error",
+        `${file?.name} is not a valid image format. Allowed: jpeg, jpg, png, webp`
+      );
+      formik.setFieldError("image", "Invalid image format.");
     }
   };
 
