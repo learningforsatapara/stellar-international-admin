@@ -10,6 +10,7 @@ import LocationPlaceholder from "../../assets/image/LocationError.png";
 // Redux
 import { GetPackageId } from "../../Redux/Redux";
 import { momentDDMMYY } from "../../helpers/utils";
+import { ReadOnlyText } from "../../Components/ReadOnlyText";
 
 export const PopOverStyle = {
   cursor: "default",
@@ -81,7 +82,8 @@ const Detail = () => {
               </div>
               <div className="col-12">
                 <h6 className="mb-1">Description</h6>
-                <p className="mb-0 txt-gray">{description}</p>
+                <ReadOnlyText content={description} />
+                {/* <p className="mb-0 txt-gray">{description}</p> */}
               </div>
               <div className="col-12">
                 <h6 className="mb-1">Locations</h6>

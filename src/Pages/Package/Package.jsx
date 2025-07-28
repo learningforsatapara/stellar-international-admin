@@ -29,6 +29,7 @@ import {
 // Destructure
 import Dragger from "antd/es/upload/Dragger";
 import { dispatchToast } from "../../helpers/utils";
+import TiptapEditorBlock from "../../Components/TiptapEditorBlock";
 
 // This would typically come from your API or constants
 const serviceOptions = [
@@ -222,7 +223,7 @@ const Package = () => {
     setPreviewFiles(validFiles);
   };
   return (
-    <div className="page">
+    <div className="page package-create">
       <div className="container-fluid overflow-hidden">
         <div className="d-flex align-items-center justify-content-between mb-4">
           <h1
@@ -310,21 +311,13 @@ const Package = () => {
 
               <div className="col-12">
                 <label className="form-label">Package Description</label>
-                <textarea
-                  rows={4}
-                  type="text"
-                  name="description"
-                  className={`form-control form-control-lg fs-6 ${
-                    formik.touched.description && formik.errors.description
-                      ? "is-invalid"
-                      : ""
-                  }`}
-                  placeholder="Enter your package name"
-                  value={formik.values.description}
-                  onChange={formik.handleChange}
-                  onBlur={formik.handleBlur}
+                <TiptapEditorBlock
+                  item={formik.values.description}
+                  onChange={(newHTML) => {
+                    formik.setFieldValue("description", newHTML);
+                  }}
                 />
-                <div className="invalid-feedback">
+                <div className="error">
                   {formik.touched.description && formik.errors.description}
                 </div>
               </div>
