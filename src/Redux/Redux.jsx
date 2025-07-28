@@ -178,3 +178,58 @@ export const DeletePackage = (id, setState) => async (dispatch) => {
       dispatchLoading(dispatch, "deletePackage", false);
     });
 };
+
+export const GetHero = () => async (dispatch) => {
+  dispatchLoading(dispatch, "hero", true);
+  axios
+    .get(`${API_URL}/hero`)
+    .then((result) => {
+      if (result?.status) {
+        dispatch({
+          type: "GET_HERO",
+          payload: result?.data,
+        });
+        dispatchError(dispatch, "hero", undefined);
+      } else elseHandler(dispatch, "hero", result?.data);
+      dispatchLoading(dispatch, "hero", false);
+    })
+    .catch((err) => {
+      dispatchLoading(dispatch, "hero", false);
+    });
+};
+
+export const DeleteHero = (id, setState) => async (dispatch) => {
+  dispatchLoading(dispatch, "deleteHero", true);
+  axios
+    .delete(`${API_URL}/hero/${id}`)
+    .then((result) => {
+      if (result?.status) {
+        setState && setState();
+        dispatchToast(dispatch, "success", "Hero Deleted Successfully");
+        dispatchError(dispatch, "deleteHero", undefined);
+      } else elseHandler(dispatch, "deleteHero", result?.data);
+      dispatchLoading(dispatch, "deleteHero", false);
+    })
+    .catch((err) => {
+      dispatchToast(dispatch, "error", err?.response?.data?.message);
+      dispatchLoading(dispatch, "deleteHero", false);
+    });
+};
+
+export const AddHero = (body, setState) => async (dispatch) => {
+  dispatchLoading(dispatch, "addHero", true);
+  axios
+    .post(`${API_URL}/hero`, body)
+    .then((result) => {
+      if (result?.status) {
+        setState && setState();
+        dispatchToast(dispatch, "success", "Hero Added Successfully");
+        dispatchError(dispatch, "addHero", undefined);
+      } else elseHandler(dispatch, "addHero", result?.data);
+      dispatchLoading(dispatch, "addHero", false);
+    })
+    .catch((err) => {
+      dispatchToast(dispatch, "error", err?.response?.data?.message);
+      dispatchLoading(dispatch, "addHero", false);
+    });
+};

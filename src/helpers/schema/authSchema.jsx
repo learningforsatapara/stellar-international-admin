@@ -58,6 +58,14 @@ export const ThemeValidation = Yup.object({
   name: Yup.string().required("Image name is required"),
 });
 
+export const HeroValidation = Yup.object({
+  image: Yup.mixed()
+    .required("Image is required")
+    .test("fileType", "Only image files are allowed", (value) => {
+      return value && value.type && value.type.startsWith("image/");
+    }),
+});
+
 export const UpdatePackageValidation = Yup.object().shape({
   // name: Yup.string().required("Required"),
   // description: Yup.string().required("Required"),

@@ -289,3 +289,9 @@ textarea {
     padding: 1rem;
   }
 }
+
+.hero-item {
+  .ant-card-body {
+    padding: 0;
+  }
+}

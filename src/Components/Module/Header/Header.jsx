@@ -25,6 +25,9 @@ const Header = () => {
             />
           </div>
           <div className="d-flex align-items-center justify-content-between gap-3 nav-list">
+            <NavLink className="nav-link" to="/hero">
+              Hero
+            </NavLink>
             <NavLink className="nav-link" to="/theme">
               Theme
             </NavLink>

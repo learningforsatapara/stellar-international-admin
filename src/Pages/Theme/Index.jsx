@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { Card, Empty, List, Modal, Tooltip, Typography } from "antd";
 
@@ -15,7 +16,6 @@ import { momentDDMMYY } from "../../helpers/utils";
 
 // Modal
 import { ThemeModal } from "../../Components/Modal/Modal";
-import { useNavigate } from "react-router-dom";
 
 const Index = () => {
   // Use
@@ -236,7 +236,7 @@ const Index = () => {
         title={`Delete ${deleteTheme?.content?.name} Theme`}
         open={deleteTheme?.open}
         onOk={() => {
-          const id = deleteTheme?.content?._id;
+          const id = deleteTheme?.content?._id || deleteTheme?.content?.id;
           if (id) {
             dispatch(
               DeleteTheme(id, () => {

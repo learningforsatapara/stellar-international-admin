@@ -35,6 +35,7 @@ const Login = lazy(() => import("./Auth/Login.jsx"));
 
 const Index = lazy(() => import("./Pages/Index.jsx"));
 const Home = lazy(() => import("./Pages/Home.jsx"));
+const Hero = lazy(() => import("./Pages/Hero.jsx"));
 const ThemeIndex = lazy(() => import("./Pages/Theme/Index.jsx"));
 const PackageIndex = lazy(() => import("./Pages/Package/Index.jsx"));
 const Package = lazy(() => import("./Pages/Package/Package.jsx"));
@@ -67,6 +68,7 @@ createRoot(document.getElementById("root")).render(
                     <Route path="theme">
                       <Route path="" element={<ThemeIndex />} />
                     </Route>
+                    <Route path="hero" element={<Hero />} />
                     <Route path="package">
                       <Route path="" element={<PackageIndex />} />
                       <Route path="add" element={<Package />} />
