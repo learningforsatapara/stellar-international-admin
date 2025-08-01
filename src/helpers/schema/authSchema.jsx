@@ -99,20 +99,28 @@ export const UpdatePackageValidation = Yup.object().shape({
   //     })
   //   )
   //   .min(1, "At least one location is required"),
+  // locations: Yup.array()
+  //   .of(
+  //     Yup.object({
+  //       name: Yup.string().required("Location name is required"),
+  //       image: Yup.mixed().test(
+  //         "is-image-url",
+  //         "Image is required",
+  //         function (value) {
+  //           // Accepts either a string or an object with a `url`
+  //           return typeof value === "string"
+  //             ? !!value
+  //             : value && typeof value.url === "string";
+  //         }
+  //       ),
+  //     })
+  //   )
+  //   .min(1, "At least one location is required"),
   locations: Yup.array()
     .of(
       Yup.object({
         name: Yup.string().required("Location name is required"),
-        image: Yup.mixed().test(
-          "is-image-url",
-          "Image is required",
-          function (value) {
-            // Accepts either a string or an object with a `url`
-            return typeof value === "string"
-              ? !!value
-              : value && typeof value.url === "string";
-          }
-        ),
+        image: Yup.string().required("Location Image is required"),
       })
     )
     .min(1, "At least one location is required"),

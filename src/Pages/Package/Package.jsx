@@ -222,6 +222,8 @@ const Package = () => {
     });
     setPreviewFiles(validFiles);
   };
+
+  console.log("calling formik", formik?.errors);
   return (
     <div className="page package-create">
       <div className="container-fluid overflow-hidden">
