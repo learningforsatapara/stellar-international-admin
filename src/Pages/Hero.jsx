@@ -124,7 +124,7 @@ const Hero = () => {
               <button
                 className="btn btn-primary rounded-pill"
                 onClick={() => {
-                  setDeleteHero({
+                  setEditHero({
                     open: true,
                     content: undefined,
                   });
