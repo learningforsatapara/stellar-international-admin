@@ -223,7 +223,9 @@ const Package = () => {
     setPreviewFiles(validFiles);
   };
 
-  console.log("calling formik", formik?.errors, "values", formik?.values);
+  if (localStorage.getItem("log") == "true") {
+    console.log("calling formik", formik?.values, "errors", formik?.errors);
+  }
   return (
     <div className="page package-create">
       <div className="container-fluid overflow-hidden">

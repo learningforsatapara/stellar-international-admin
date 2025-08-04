@@ -120,7 +120,16 @@ export const UpdatePackageValidation = Yup.object().shape({
     .of(
       Yup.object({
         name: Yup.string().required("Location name is required"),
-        image: Yup.string().required("Location Image is required"),
+        image: Yup.mixed()
+          .required("Location Image is required")
+          .test(
+            "is-not-empty",
+            "Location Image is required",
+            (value) =>
+              value &&
+              typeof value === "object" &&
+              Object.keys(value).length > 0
+          ),
       })
     )
     .min(1, "At least one location is required"),

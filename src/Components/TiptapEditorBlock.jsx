@@ -85,7 +85,6 @@ const TiptapEditorBlock = ({ item, onChange, onRemove }) => {
   });
 
   useEffect(() => {
-    console.log("calling item", item);
     if (editor && item !== editor.getHTML()) {
       editor.commands.setContent(item);
     }

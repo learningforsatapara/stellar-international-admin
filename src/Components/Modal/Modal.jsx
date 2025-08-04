@@ -46,26 +46,91 @@ export const urlToFile = async (url, fileName = "image.jpg") => {
   return new File([blob], fileName, { type: fileType });
 };
 
-export const convertLocationsWithImageUrls = async (locationsFromApi) => {
+// export const convertLocationsWithImageUrls = async (locationsFromApi) => {
+//   const updatedLocations = await Promise.all(
+//     locationsFromApi.map(async (loc, index) => {
+//       const file = await urlToFile(loc.image, loc.image.split("/").pop());
+
+//       return {
+//         name: loc.name || "",
+//         description: loc.description || "",
+//         image: {
+//           uid: `rc-upload-${Date.now()}-${index}`,
+//           name: file.name,
+//           status: "done",
+//           url: loc.image, // for preview in AntD
+//           originFileObj: file, // FormData will use this
+//         },
+//       };
+//     })
+//   );
+
+//   return updatedLocations;
+// };
+
+export const convertLocationsWithImageUrls = async (locationsFromApi = []) => {
   const updatedLocations = await Promise.all(
     locationsFromApi.map(async (loc, index) => {
-      const file = await urlToFile(loc.image, loc.image.split("/").pop());
+      const rawUrl = loc.image;
+      const secureUrl = rawUrl.startsWith("http://")
+        ? rawUrl.replace("http://", "https://")
+        : rawUrl;
 
-      return {
-        name: loc.name || "",
-        description: loc.description || "",
-        image: {
-          uid: `rc-upload-${Date.now()}-${index}`,
-          name: file.name,
-          status: "done",
-          url: loc.image, // for preview in AntD
-          originFileObj: file, // FormData will use this
-        },
-      };
+      try {
+        // Try with HTTPS
+        const file = await urlToFile(secureUrl, secureUrl.split("/").pop());
+
+        if (!file) throw new Error("Invalid file object from HTTPS");
+
+        return {
+          name: loc.name || "",
+          description: loc.description || "",
+          image: {
+            uid: `rc-upload-${Date.now()}-${index}`,
+            name: file.name,
+            status: "done",
+            url: secureUrl,
+            originFileObj: file,
+            type: file.type || "image/jpeg",
+          },
+        };
+      } catch (err) {
+        console.warn(`HTTPS failed for ${secureUrl}, retrying with HTTP`, err);
+
+        // Retry with HTTP fallback
+        try {
+          const fallbackUrl = rawUrl.replace("https://", "http://");
+          const file = await urlToFile(
+            fallbackUrl,
+            fallbackUrl.split("/").pop()
+          );
+
+          if (!file) throw new Error("Invalid file object from HTTP");
+
+          return {
+            name: loc.name || "",
+            description: loc.description || "",
+            image: {
+              uid: `rc-upload-${Date.now()}-${index}`,
+              name: file.name,
+              status: "done",
+              url: fallbackUrl,
+              originFileObj: file,
+              type: file.type || "image/jpeg",
+            },
+          };
+        } catch (fallbackErr) {
+          console.error(
+            `Both HTTPS and HTTP failed for: ${rawUrl}`,
+            fallbackErr
+          );
+          return null; // Skip this entry
+        }
+      }
     })
   );
 
-  return updatedLocations;
+  return updatedLocations.filter(Boolean); // Remove nulls from failed conversions
 };
 
 export const dpList = (data, slice) => {
@@ -78,21 +143,84 @@ export const dpList = (data, slice) => {
   return { dataList, length, sliceLength, list, sliceList };
 };
 
+// export const convertTourImageUrls = async (imageUrls = []) => {
+//   const formatted = await Promise.all(
+//     imageUrls.map(async (url, index) => {
+//       const file = await urlToFile(url, url.split("/").pop());
+
+//       return {
+//         uid: `rc-upload-${Date.now()}-${index}`,
+//         name: file.name,
+//         status: "done",
+//         url: url,
+//         originFileObj: file,
+//       };
+//     })
+//   );
+//   return formatted;
+// };
+
 export const convertTourImageUrls = async (imageUrls = []) => {
   const formatted = await Promise.all(
-    imageUrls.map(async (url, index) => {
-      const file = await urlToFile(url, url.split("/").pop());
+    imageUrls.map(async (rawUrl, index) => {
+      try {
+        // Force HTTPS if HTTP is used
+        const secureUrl = rawUrl.startsWith("http://")
+          ? rawUrl.replace("http://", "https://")
+          : rawUrl;
 
-      return {
-        uid: `rc-upload-${Date.now()}-${index}`,
-        name: file.name,
-        status: "done",
-        url: url,
-        originFileObj: file,
-      };
+        // Try fetching the image with HTTPS
+        const file = await urlToFile(secureUrl, secureUrl.split("/").pop());
+
+        // If successful, return with secure URL
+        if (file) {
+          return {
+            uid: `rc-upload-${Date.now()}-${index}`,
+            name: file.name,
+            status: "done",
+            url: secureUrl,
+            originFileObj: file,
+            type: file.type || "image/jpeg",
+          };
+        }
+
+        throw new Error("SSL failed, fallback to HTTP");
+      } catch (err) {
+        console.warn(
+          `HTTPS fetch failed for ${rawUrl}, trying HTTP fallback...`,
+          err
+        );
+
+        // Try fallback with original HTTP (if HTTPS failed)
+        try {
+          const fallbackUrl = rawUrl.replace("https://", "http://");
+          const fallbackFile = await urlToFile(
+            fallbackUrl,
+            fallbackUrl.split("/").pop()
+          );
+
+          if (fallbackFile) {
+            return {
+              uid: `rc-upload-${Date.now()}-${index}`,
+              name: fallbackFile?.name,
+              status: "done",
+              url: fallbackUrl,
+              originFileObj: fallbackFile,
+              type: fallbackFile?.type || "image/jpeg",
+            };
+          }
+        } catch (fallbackErr) {
+          console.error(
+            `Both HTTPS and HTTP failed for ${rawUrl}`,
+            fallbackErr
+          );
+          return null;
+        }
+      }
     })
   );
-  return formatted;
+
+  return formatted.filter(Boolean);
 };
 
 // GoRebelModal
