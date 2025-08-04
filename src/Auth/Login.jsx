@@ -14,7 +14,7 @@ import "./style.scss";
 
 // Validation
 import { loginValidationSchema } from "../helpers/schema/authSchema";
-import { PasswordField } from "../Components/Component";
+import { isLogin, PasswordField } from "../Components/Component";
 import {
   dispatchToast,
   SECRET_EMAIL,
@@ -26,6 +26,7 @@ const Login = () => {
   // Use
   const navigate = useNavigate();
   const dispatch = useDispatch();
+  const login = isLogin();
 
   // Selecotr
   const { loginLoading } = useSelector((state) => state.loading);
@@ -52,7 +53,8 @@ const Login = () => {
         localStorage.setItem("loginStatus", "true");
         localStorage.setItem("email", encryptedEmail);
         localStorage.setItem("password", encryptedPassword);
-        navigate("/");
+        // navigate("/");
+        window.location.href = "/";
         dispatchToast(
           dispatch,
           "success",
@@ -63,6 +65,12 @@ const Login = () => {
       }
     },
   });
+
+  useEffect(() => {
+    if (login) {
+      navigate("/");
+    }
+  }, [login]);
 
   return (
     <div className="login-page min-vh-100 px-sm-4 px-3 py-5 d-flex flex-column align-items-center justify-content-center position-relative">

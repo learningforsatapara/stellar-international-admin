@@ -223,7 +223,7 @@ const Package = () => {
     setPreviewFiles(validFiles);
   };
 
-  console.log("calling formik", formik?.errors);
+  console.log("calling formik", formik?.errors, "values", formik?.values);
   return (
     <div className="page package-create">
       <div className="container-fluid overflow-hidden">
@@ -314,7 +314,7 @@ const Package = () => {
               <div className="col-12">
                 <label className="form-label">Package Description</label>
                 <TiptapEditorBlock
-                  item={formik.values.description}
+                  item={formik?.values?.description}
                   onChange={(newHTML) => {
                     formik.setFieldValue("description", newHTML);
                   }}

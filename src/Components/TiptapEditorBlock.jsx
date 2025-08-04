@@ -68,7 +68,7 @@ const TiptapEditorBlock = ({ item, onChange, onRemove }) => {
   const [color, setColor] = useState("#000000");
 
   const editor = useEditor({
-    content: item.content,
+    content: item,
     extensions: [
       StarterKit.configure({ heading: { levels: [1, 2, 3, 4, 5, 6] } }),
       Underline,
@@ -85,10 +85,11 @@ const TiptapEditorBlock = ({ item, onChange, onRemove }) => {
   });
 
   useEffect(() => {
-    if (editor && item.content !== editor.getHTML()) {
-      editor.commands.setContent(item.content);
+    console.log("calling item", item);
+    if (editor && item !== editor.getHTML()) {
+      editor.commands.setContent(item);
     }
-  }, [item.content, editor]);
+  }, [item, editor]);
 
   const handleColorChange = (newColor) => {
     const hex =
